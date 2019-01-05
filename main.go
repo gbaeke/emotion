@@ -14,12 +14,12 @@ import (
 	"gocv.io/x/gocv"
 )
 
-//InputData is sent to ResNet50 model
+//InputData is sent to FER+ model
 type InputData struct {
 	Data [1][1][64][64]uint8 `json:"data"`
 }
 
-//OutputData is received from ResNet50 model
+//OutputData is received from FER+ model
 type OutputData struct {
 	Result []float64 `json:"result"`
 	Time   float64   `json:"time"`
