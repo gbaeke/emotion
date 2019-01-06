@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/disintegration/imaging"
+	//"github.com/gbaeke/emotion/faceapi/msface"
 	"gocv.io/x/gocv"
 )
 
@@ -92,7 +93,16 @@ func main() {
 
 			// get emotion
 			if err == nil && frameCount%2 == 0 {
+
+				//use FER+
 				emotion = getEmotion(emoImg)
+
+				//use Microsoft Face API; encode mat to JPG and convert to io.Reader
+				//encodedImage, _ := gocv.IMEncode(gocv.JPEGFileExt, face)
+				//emotion, err = msface.GetEmotion(bytes.NewReader(encodedImage))
+				//if err != nil {
+				//	log.Println(err)
+				//}
 			}
 
 			// add text to webcam image
