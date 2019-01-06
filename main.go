@@ -30,7 +30,7 @@ func main() {
 	xmlFile := "haarcascade_frontalface_default.xml"
 
 	// open webcam
-	webcam, err := gocv.VideoCaptureDevice(int(deviceID))
+	webcam, err := gocv.VideoCaptureDevice(deviceID)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -41,7 +41,7 @@ func main() {
 	window := gocv.NewWindow("Face Detection with FER+")
 	defer window.Close()
 
-	// prepare image matrix
+	// captured image ends up in below image matrix
 	img := gocv.NewMat()
 	defer img.Close()
 
@@ -58,8 +58,8 @@ func main() {
 	}
 
 	fmt.Printf("start reading camera device: %v\n", deviceID)
-	frameCount := 0
-	emotion := ""
+	frameCount := 0 //used to detect emotion every 2nd frame
+	emotion := ""   //emotion displayed on screen
 	for {
 		if ok := webcam.Read(&img); !ok {
 			fmt.Printf("cannot read device %d\n", deviceID)
@@ -74,27 +74,23 @@ func main() {
 			image.Point{300, 300})
 		frameCount++
 
-		// draw a rectangle around each face on the original image,
-		// along with text describing the emotion
+		// only look at first face found
 		if len(rects) > 0 {
 			r := rects[0]
 
-			// draw rectangle
+			// draw green rectangle around the face
 			gocv.Rectangle(&img, r, green, 3)
-
-			// make r a bit larger
-			//r = r.Add(image.Point{10, 10})
 
 			// get mat of face region; copy to a new mat
 			faceRegion := img.Region(r)
 			face := gocv.NewMat()
 			faceRegion.CopyTo(&face)
 
-			// convert mat with just the face to image
+			// convert new mat with just the face to image
 			emoImg, err := face.ToImage()
 			emoImg = resizeImage(emoImg, 64, 64)
 
-			// get emotion (around 0.3 seconds)
+			// get emotion
 			if err == nil && frameCount%2 == 0 {
 				emotion = getEmotion(emoImg)
 			}
@@ -102,9 +98,8 @@ func main() {
 			// add text to webcam image
 			size := gocv.GetTextSize(emotion, gocv.FontHersheyPlain, 1.5, 3)
 			pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
-			if emotion != "" {
-				gocv.PutText(&img, emotion, pt, gocv.FontHersheyPlain, 1.2, green, 2)
-			}
+			gocv.PutText(&img, emotion, pt, gocv.FontHersheyPlain, 1.2, green, 2)
+
 		}
 
 		// show the image in the window, and wait 1 millisecond
@@ -144,7 +139,7 @@ func getEmotion(m image.Image) string {
 	inputJSON, _ := json.Marshal(input)
 	body := bytes.NewBuffer(inputJSON)
 
-	// Create the HTTP request - no need for auth with local ResNet50 container
+	// Create the HTTP request - no need for auth with local FER+ container
 	client := &http.Client{}
 	request, err := http.NewRequest("POST", "http://localhost:5002/score", body)
 	request.Header.Add("Content-Type", "application/json")
