@@ -58,6 +58,8 @@ func main() {
 	}
 
 	fmt.Printf("start reading camera device: %v\n", deviceID)
+	frameCount := 0
+	emotion := ""
 	for {
 		if ok := webcam.Read(&img); !ok {
 			fmt.Printf("cannot read device %d\n", deviceID)
@@ -70,6 +72,7 @@ func main() {
 		// detect faces
 		rects := classifier.DetectMultiScaleWithParams(img, 1.1, 5, 0, image.Point{100, 100},
 			image.Point{300, 300})
+		frameCount++
 
 		// draw a rectangle around each face on the original image,
 		// along with text describing the emotion
@@ -92,8 +95,7 @@ func main() {
 			emoImg = resizeImage(emoImg, 64, 64)
 
 			// get emotion (around 0.3 seconds)
-			var emotion string
-			if err == nil {
+			if err == nil && frameCount%2 == 0 {
 				emotion = getEmotion(emoImg)
 			}
 
