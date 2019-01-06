@@ -14,3 +14,5 @@ Code requires:
 - gocv.io/x/gocv
 
 Also install Open CV. See [GoCV](https://gocv.io/) for more info
+
+See [blog post](https://blog.baeke.info/2019/01/06/detecting-emotions-with-fer/) for more information.
