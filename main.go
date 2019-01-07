@@ -29,10 +29,16 @@ type OutputData struct {
 
 func main() {
 	scoreuri, ok := os.LookupEnv("SCOREURI")
-	fmt.Println(scoreuri)
 	if !ok || scoreuri == "" {
 		scoreuri = "http://localhost:5002/score"
 	}
+	log.Println("Scoring URI:", scoreuri)
+
+	video, ok := os.LookupEnv("VIDEO")
+	if !ok || video == "" {
+		video = "1"
+	}
+	log.Println("Video:", video)
 
 	deviceID := 0
 	xmlFile := "haarcascade_frontalface_default.xml"
@@ -45,9 +51,12 @@ func main() {
 	}
 	defer webcam.Close()
 
-	// open display window
-	//window := gocv.NewWindow("Face Detection with FER+")
-	//defer window.Close()
+	var window *gocv.Window
+	if video == "1" {
+		// open display window
+		window = gocv.NewWindow("Face Detection with FER+")
+		defer window.Close()
+	}
 
 	// captured image ends up in below image matrix
 	img := gocv.NewMat()
@@ -112,18 +121,22 @@ func main() {
 				//}
 			}
 
-			// add text to webcam image
-			size := gocv.GetTextSize(emotion, gocv.FontHersheyPlain, 1.5, 3)
-			pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
-			gocv.PutText(&img, emotion, pt, gocv.FontHersheyPlain, 1.2, green, 2)
-
+			if video == "1" {
+				// add text to webcam image
+				size := gocv.GetTextSize(emotion, gocv.FontHersheyPlain, 1.5, 3)
+				pt := image.Pt(r.Min.X+(r.Min.X/2)-(size.X/2), r.Min.Y-2)
+				gocv.PutText(&img, emotion, pt, gocv.FontHersheyPlain, 1.2, green, 2)
+			}
 		}
 
-		// show the image in the window, and wait 1 millisecond
-		//window.IMShow(img)
-		//if window.WaitKey(1) >= 0 {
-		//break
-		//}
+		if video == "1" {
+			// show the image in the window, and wait 1 millisecond
+			window.IMShow(img)
+			if window.WaitKey(1) >= 0 {
+				break
+			}
+		}
+
 	}
 
 }
