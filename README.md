@@ -21,4 +21,4 @@ See [blog post](https://blog.baeke.info/2019/01/06/detecting-emotions-with-fer/)
 
 Run in a container as follows:
 
-docker run -it --device=/dev/video0 --env SCOREURI="YOUR-SCORE-URI" --env VIDEO=0 gbaeke/emo
+docker run -it --rm --device=/dev/video0 --env SCOREURI="YOUR-SCORE-URI" --env VIDEO=0 gbaeke/emo
