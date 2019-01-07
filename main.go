@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/disintegration/imaging"
 	//"github.com/gbaeke/emotion/faceapi/msface"
@@ -27,6 +28,12 @@ type OutputData struct {
 }
 
 func main() {
+	scoreuri, ok := os.LookupEnv("SCOREURI")
+	fmt.Println(scoreuri)
+	if !ok || scoreuri == "" {
+		scoreuri = "http://localhost:5002/score"
+	}
+
 	deviceID := 0
 	xmlFile := "haarcascade_frontalface_default.xml"
 
@@ -39,8 +46,8 @@ func main() {
 	defer webcam.Close()
 
 	// open display window
-	window := gocv.NewWindow("Face Detection with FER+")
-	defer window.Close()
+	//window := gocv.NewWindow("Face Detection with FER+")
+	//defer window.Close()
 
 	// captured image ends up in below image matrix
 	img := gocv.NewMat()
@@ -95,7 +102,7 @@ func main() {
 			if err == nil && frameCount%2 == 0 {
 
 				//use FER+
-				emotion = getEmotion(emoImg)
+				emotion = getEmotion(emoImg, scoreuri)
 
 				//use Microsoft Face API; encode mat to JPG and convert to io.Reader
 				//encodedImage, _ := gocv.IMEncode(gocv.JPEGFileExt, face)
@@ -113,15 +120,15 @@ func main() {
 		}
 
 		// show the image in the window, and wait 1 millisecond
-		window.IMShow(img)
-		if window.WaitKey(1) >= 0 {
-			break
-		}
+		//window.IMShow(img)
+		//if window.WaitKey(1) >= 0 {
+		//break
+		//}
 	}
 
 }
 
-func getEmotion(m image.Image) string {
+func getEmotion(m image.Image, scoreuri string) string {
 
 	// multidim array as input tensor
 	var BCHW [1][1][64][64]uint8
@@ -151,7 +158,7 @@ func getEmotion(m image.Image) string {
 
 	// Create the HTTP request - no need for auth with local FER+ container
 	client := &http.Client{}
-	request, err := http.NewRequest("POST", "http://localhost:5002/score", body)
+	request, err := http.NewRequest("POST", scoreuri, body)
 	request.Header.Add("Content-Type", "application/json")
 
 	// Send the request to the web service
