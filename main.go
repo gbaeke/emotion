@@ -112,6 +112,7 @@ func main() {
 
 				//use FER+
 				emotion = getEmotion(emoImg, scoreuri)
+				log.Println("Emotion", emotion)
 
 				//use Microsoft Face API; encode mat to JPG and convert to io.Reader
 				//encodedImage, _ := gocv.IMEncode(gocv.JPEGFileExt, face)
@@ -204,7 +205,7 @@ func getEmotion(m image.Image, scoreuri string) string {
 	categories := map[int]string{0: "neutral", 1: "happy", 2: "surprise", 3: "sadness",
 		4: "anger", 5: "disgust", 6: "fear", 7: "contempt"}
 
-	fmt.Println("Highest prob is", maxProb, "at", maxIndex, "(inference time:", modelResult.Time, ")")
+	log.Println("Highest prob is", maxProb, "at", maxIndex, "(inference time:", modelResult.Time, ")")
 	return categories[maxIndex]
 }
 
